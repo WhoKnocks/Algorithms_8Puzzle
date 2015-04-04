@@ -1,19 +1,20 @@
 package gna;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class Board {
 
     private int[][] tiles;
-    private int size;
+
     private Board previousBoard;
 
     // construct a board from an N-by-N array of tiles
     public Board(int[][] tiles) {
         this.tiles = tiles;
-        size = tiles.length * tiles.length;
     }
 
     // return number of blocks out of place
@@ -26,7 +27,6 @@ public class Board {
                 }
             }
         }
-
         return wrongCounter + calcSteps();
     }
 
@@ -44,7 +44,7 @@ public class Board {
         return wrongCounter + calcSteps();
     }
 
-    //calculate steps
+    //calculate the amount of previous boards (cost)
     public int calcSteps() {
         int steps = 0;
         Board prev = this.getPreviousBoard();
@@ -71,32 +71,24 @@ public class Board {
 
     // return a Collection of all neighboring board positions
     public Collection<Board> neighbors() {
-        Collection<Board> neighbors = new HashSet<Board>();
+        Collection<Board> neighbors = new ArrayList<Board>();
         Pair currPositionZero = getCurrentPosition(0);
 
         Board neighbor;
-        //move tile down if possible
-        if (currPositionZero.getRow() != 0) {
-            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow() - 1, currPositionZero.getCol())));
-            if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
-                neighbor.setPreviousBoard(this);
-                neighbors.add(neighbor);
-            }
-        }
 
         //move tile up if possible
         if (currPositionZero.getRow() != tiles.length - 1) {
             neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow() + 1, currPositionZero.getCol())));
-            if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
+            if ((this.getPreviousBoard() != null && !isSameAsParent(neighbor)) || this.getPreviousBoard() == null) {
                 neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
             }
         }
 
-        //move tile to the right if possible
-        if (currPositionZero.getCol() != 0) {
-            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow(), currPositionZero.getCol() - 1)));
-            if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
+        //move tile down if possible
+        if (currPositionZero.getRow() != 0) {
+            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow() - 1, currPositionZero.getCol())));
+            if ((this.getPreviousBoard() != null && !isSameAsParent(neighbor)) || this.getPreviousBoard() == null) {
                 neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
             }
@@ -105,12 +97,42 @@ public class Board {
         //move tile to the left if possible
         if (currPositionZero.getCol() != tiles.length - 1) {
             neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow(), currPositionZero.getCol() + 1)));
-            if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
+            if ((this.getPreviousBoard() != null && !isSameAsParent(neighbor)) || this.getPreviousBoard() == null) {
                 neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
             }
         }
+
+        //move tile to the right if possible
+        if (currPositionZero.getCol() != 0) {
+            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow(), currPositionZero.getCol() - 1)));
+            if ((this.getPreviousBoard() != null && !isSameAsParent(neighbor)) || this.getPreviousBoard() == null) {
+                neighbor.setPreviousBoard(this);
+                neighbors.add(neighbor);
+            }
+        }
+
+
         return neighbors;
+    }
+
+    public boolean isSameAsParent(Board board) {
+        for (Board parent : getParents()) {
+            if (parent.equals(board)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Board> getParents() {
+        List<Board> list = new ArrayList<Board>();
+        Board prev = this.getPreviousBoard();
+        while (prev != null) {
+            list.add(prev);
+            prev = prev.getPreviousBoard();
+        }
+        return list;
     }
 
     // return a string representation of the board
@@ -118,10 +140,11 @@ public class Board {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
-                builder.append(tiles[i][j]).append(" ");
+                builder.append(String.format("%-2s", tiles[i][j])).append(" ");
             }
             builder.append("\n");
         }
+        builder.append("Heuristic = " + this.manhattan());
         return builder.toString();
     }
 
@@ -200,17 +223,17 @@ public class Board {
         if (row == tiles.length - 1 && col == tiles.length - 1) {
             return 0;
         }
-        return row * tiles.length + col + 1;
+        return (row * tiles.length) + col + 1;
     }
 
     // returns the row a number should be on
     private int getCorrectRow(int number) {
-        return number / tiles.length;
+        return (number - 1) / tiles.length;
     }
 
     // return the column a number should be on
     private int getCorrectColumn(int number) {
-        return (number % tiles.length) - 1;
+        return ((number - 1) % tiles.length);
     }
 
     // returns a coordinate pair of the current position of a number
@@ -231,10 +254,10 @@ public class Board {
     }
 
     // switches two positions and returns a new tile[][]
-    private int[][] switcher(Pair pair1, Pair pair2) {
+    private int[][] switcher(Pair zeroPos, Pair pair2) {
         int[][] newTiles = copyTiles();
-        newTiles[pair1.getRow()][pair1.getCol()] = tiles[pair2.getRow()][pair2.getCol()];
-        newTiles[pair2.getRow()][pair2.getCol()] = tiles[pair1.getRow()][pair1.getCol()];
+        newTiles[zeroPos.getRow()][zeroPos.getCol()] = tiles[pair2.getRow()][pair2.getCol()];
+        newTiles[pair2.getRow()][pair2.getCol()] = 0;
         return newTiles;
     }
 
@@ -267,7 +290,5 @@ public class Board {
     public void setPreviousBoard(Board previousBoard) {
         this.previousBoard = previousBoard;
     }
-
-
 }
 

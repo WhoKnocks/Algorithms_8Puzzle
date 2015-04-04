@@ -1,13 +1,14 @@
 package gna;
 
+
 import libpract.PriorityFunc;
 
 import java.util.*;
 
-public class Solver  {
+
+public class Solver {
 
     PriorityQueue<Board> boardPQ;
-    List<Board> possibleSolutions;
     Board endBoard;
 
     /**
@@ -40,21 +41,21 @@ public class Solver  {
     }
 
     private void solve() {
-       long begin = System.currentTimeMillis();
+        long begin = System.currentTimeMillis();
 
-        //get minimum with heuristic function
+        //get minimum heuristic value board
         Board lowHeurBoard = boardPQ.poll();
 
         while (!lowHeurBoard.isSolved()) {
             for (Board neighbor : lowHeurBoard.neighbors()) {
-                    boardPQ.add(neighbor);
+                boardPQ.offer(neighbor);
             }
             lowHeurBoard = boardPQ.poll();
         }
         endBoard = lowHeurBoard;
+
         System.out.println("tijd in miliseconden: " + (System.currentTimeMillis() - begin));
     }
-
 
     /**
      * Returns a Collection of board positions as the solution. It should contain the initial
@@ -69,7 +70,7 @@ public class Solver  {
             tempBoard = tempBoard.getPreviousBoard();
         }
         Collections.reverse(solution);
-        return  solution;
+        return solution;
     }
 }
 

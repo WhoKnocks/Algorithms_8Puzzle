@@ -38,12 +38,11 @@ public class UnitTests {
     @Test
     public void hamming_test() {
         assertEquals(5, board.hamming());
-
     }
 
     @Test
     public void manhattan_test() {
-        assertEquals(10, board.manhattan());
+       assertEquals(10, board.manhattan());
     }
 
     @Test
