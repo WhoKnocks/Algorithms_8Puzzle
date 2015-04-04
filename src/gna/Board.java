@@ -6,18 +6,24 @@ import java.util.HashSet;
 
 public class Board {
 
-    private int[][] tiles;
-    private int size;
+    protected static int[][] tiles;
     private Board previousBoard;
+    private Pair zeroPositon;
+
+    public Board(Board previousBoard) {
+        this.previousBoard = previousBoard;
+    }
 
     // construct a board from an N-by-N array of tiles
     public Board(int[][] tiles) {
-        this.tiles = tiles;
-        size = tiles.length * tiles.length;
+        Board.tiles = tiles;
+        zeroPositon = getCurrentPosition(0);
     }
 
     // return number of blocks out of place
     public int hamming() {
+        System.out.println("1");
+        int[][] tiles = getTiles();
         int wrongCounter = 0;
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
@@ -32,6 +38,8 @@ public class Board {
 
     // return sum of Manhattan distances between blocks and goal
     public int manhattan() {
+        System.out.println("2");
+        int[][] tiles = getTiles();
         int wrongCounter = 0;
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
@@ -59,9 +67,11 @@ public class Board {
     @Override
     public boolean equals(Object y) {
         Board toCompare = (Board) y;
+        int[][] toCompareTiles = getTiles();
+        int[][] tiles = getTiles();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
-                if (toCompare.getTiles()[i][j] != tiles[i][j]) {
+                if (toCompareTiles[i][j] != tiles[i][j]) {
                     return false;
                 }
             }
@@ -71,43 +81,45 @@ public class Board {
 
     // return a Collection of all neighboring board positions
     public Collection<Board> neighbors() {
+        int[][] tiles = getTiles();
         Collection<Board> neighbors = new HashSet<Board>();
         Pair currPositionZero = getCurrentPosition(0);
 
         Board neighbor;
         //move tile down if possible
         if (currPositionZero.getRow() != 0) {
-            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow() - 1, currPositionZero.getCol())));
+            neighbor = new ChangedBoard(this, Change.DOWN);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
-                neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
+                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow() + 1, this.getZeroPositon().getCol()));
             }
         }
 
         //move tile up if possible
         if (currPositionZero.getRow() != tiles.length - 1) {
-            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow() + 1, currPositionZero.getCol())));
+            neighbor = new ChangedBoard(this, Change.UP);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
                 neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
+                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow() - 1, this.getZeroPositon().getCol()));
             }
         }
 
         //move tile to the right if possible
         if (currPositionZero.getCol() != 0) {
-            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow(), currPositionZero.getCol() - 1)));
+            neighbor = new ChangedBoard(this, Change.RIGHT);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
-                neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
+                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow(), this.getZeroPositon().getCol() - 1));
             }
         }
 
         //move tile to the left if possible
         if (currPositionZero.getCol() != tiles.length - 1) {
-            neighbor = new Board(switcher(currPositionZero, new Pair(currPositionZero.getRow(), currPositionZero.getCol() + 1)));
+            neighbor = new ChangedBoard(this, Change.LEFT);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
-                neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
+                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow(), this.getZeroPositon().getCol() + 1));
             }
         }
         return neighbors;
@@ -128,7 +140,7 @@ public class Board {
     // is the initial board solvable?
     public boolean isSolvable() {
         //save the original board before calculating
-        int[][] originalBoard = copyTiles();
+        int[][] originalBoard = copyTiles(Board.tiles);
         Pair currPositionZero = getCurrentPosition(0);
 
         //move to the right
@@ -196,7 +208,8 @@ public class Board {
     }
 
     //returns the correct number on a row and column
-    private int getCorrectNumber(int row, int col) {
+    int getCorrectNumber(int row, int col) {
+        int[][] tiles = getTiles();
         if (row == tiles.length - 1 && col == tiles.length - 1) {
             return 0;
         }
@@ -214,7 +227,8 @@ public class Board {
     }
 
     // returns a coordinate pair of the current position of a number
-    private Pair getCurrentPosition(int number) {
+    protected Pair getCurrentPosition(int number) {
+        int[][] tiles = getTiles();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
                 if (tiles[i][j] == number) {
@@ -226,20 +240,20 @@ public class Board {
     }
 
 
-    private int[][] getTiles() {
+    protected int[][] getTiles() {
         return tiles;
     }
 
     // switches two positions and returns a new tile[][]
-    private int[][] switcher(Pair pair1, Pair pair2) {
-        int[][] newTiles = copyTiles();
+    protected int[][] switcher(Pair pair1, Pair pair2) {
+        int[][] newTiles = copyTiles(Board.tiles);
         newTiles[pair1.getRow()][pair1.getCol()] = tiles[pair2.getRow()][pair2.getCol()];
         newTiles[pair2.getRow()][pair2.getCol()] = tiles[pair1.getRow()][pair1.getCol()];
         return newTiles;
     }
 
     // copies to entire new double array
-    private int[][] copyTiles() {
+    protected int[][] copyTiles(int[][] tiles) {
         int[][] newTiles = new int[tiles.length][tiles.length];
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
@@ -249,7 +263,8 @@ public class Board {
         return newTiles;
     }
 
-    public boolean isSolved() {
+    protected boolean isSolved() {
+        int[][] tiles = getTiles();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
                 if (getCorrectNumber(i, j) != tiles[i][j]) {
@@ -268,6 +283,12 @@ public class Board {
         this.previousBoard = previousBoard;
     }
 
+    public Pair getZeroPositon() {
+        return zeroPositon;
+    }
 
+    public void setZeroPositon(Pair zeroPositon) {
+        this.zeroPositon = zeroPositon;
+    }
 }
 

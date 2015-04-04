@@ -41,17 +41,13 @@ public class Solver  {
 
     private void solve() {
        long begin = System.currentTimeMillis();
-
-        possibleSolutions = new ArrayList<Board>();
         //get minimum with heuristic function
         Board lowHeurBoard = boardPQ.poll();
-        possibleSolutions.add(lowHeurBoard);
         while (!lowHeurBoard.isSolved()) {
             for (Board neighbor : lowHeurBoard.neighbors()) {
                     boardPQ.add(neighbor);
             }
             lowHeurBoard = boardPQ.poll();
-            possibleSolutions.add(lowHeurBoard);
         }
         endBoard = lowHeurBoard;
 
