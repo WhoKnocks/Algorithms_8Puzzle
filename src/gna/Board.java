@@ -67,7 +67,7 @@ public class Board {
     @Override
     public boolean equals(Object y) {
         Board toCompare = (Board) y;
-        int[][] toCompareTiles = getTiles();
+        int[][] toCompareTiles = toCompare.getTiles();
         int[][] tiles = getTiles();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
@@ -91,7 +91,7 @@ public class Board {
             neighbor = new ChangedBoard(this, Change.DOWN);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
                 neighbors.add(neighbor);
-                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow() + 1, this.getZeroPositon().getCol()));
+                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow() - 1, this.getZeroPositon().getCol()));
             }
         }
 
@@ -99,9 +99,8 @@ public class Board {
         if (currPositionZero.getRow() != tiles.length - 1) {
             neighbor = new ChangedBoard(this, Change.UP);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
-                neighbor.setPreviousBoard(this);
                 neighbors.add(neighbor);
-                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow() - 1, this.getZeroPositon().getCol()));
+                neighbor.setZeroPositon(new Pair(this.getZeroPositon().getRow() +1, this.getZeroPositon().getCol()));
             }
         }
 
@@ -115,7 +114,7 @@ public class Board {
         }
 
         //move tile to the left if possible
-        if (currPositionZero.getCol() != tiles.length - 1) {
+        if (currPositionZero.getCol()!= tiles.length - 1) {
             neighbor = new ChangedBoard(this, Change.LEFT);
             if ((this.getPreviousBoard() != null && !neighbor.equals(this.getPreviousBoard())) || this.getPreviousBoard() == null) {
                 neighbors.add(neighbor);
@@ -127,6 +126,7 @@ public class Board {
 
     // return a string representation of the board
     public String toString() {
+        int[][] tiles = getTiles();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {

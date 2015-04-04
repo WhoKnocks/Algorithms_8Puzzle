@@ -23,7 +23,7 @@ public class ChangedBoard extends Board {
             Pair zeroPosition = getPreviousBoard().getZeroPositon();
             if (change == Change.DOWN) {
                 newBoard[zeroPosition.getRow()][zeroPosition.getCol()] = newBoard[zeroPosition.getRow() - 1][zeroPosition.getCol()];
-                newBoard[zeroPosition.getRow() - 1 ][zeroPosition.getCol()]=0;
+                newBoard[zeroPosition.getRow() - 1][zeroPosition.getCol()] = 0;
             }
             if (change == Change.UP) {
                 newBoard[zeroPosition.getRow()][zeroPosition.getCol()] = newBoard[zeroPosition.getRow() + 1][zeroPosition.getCol()];
@@ -34,7 +34,7 @@ public class ChangedBoard extends Board {
                 newBoard[zeroPosition.getRow()][zeroPosition.getCol() + 1] = 0;
             }
             if (change == Change.RIGHT) {
-                newBoard[zeroPosition.getRow()][zeroPosition.getCol()] = newBoard[zeroPosition.getRow() ][zeroPosition.getCol() - 1];
+                newBoard[zeroPosition.getRow()][zeroPosition.getCol()] = newBoard[zeroPosition.getRow()][zeroPosition.getCol() - 1];
                 newBoard[zeroPosition.getRow()][zeroPosition.getCol() - 1] = 0;
             }
         }
@@ -48,12 +48,14 @@ public class ChangedBoard extends Board {
 
     private Stack<Change> getChanges() {
         System.out.println("getchanges");
-        Board prevBoard = super.getPreviousBoard();
+        Board prevBoard = getPreviousBoard();
         Stack<Change> changes = new Stack<Change>();
         changes.push(change);
-        while (prevBoard != null && prevBoard instanceof ChangedBoard) {
-            prevBoard = super.getPreviousBoard();
-            changes.push(((ChangedBoard) prevBoard).change);
+        while (prevBoard != null) {
+            prevBoard = prevBoard.getPreviousBoard();
+            if (prevBoard instanceof ChangedBoard) {
+                changes.push(((ChangedBoard) prevBoard).change);
+            }
         }
         return changes;
     }
