@@ -24,7 +24,7 @@ class Main
 		}
 		else
 		{
-			Solver solver = new Solver(initial, PriorityFunc.HAMMING);
+			Solver solver = new Solver(initial, PriorityFunc.MANHATTAN);
 	
 			for (Board board : solver.solution())
 				System.out.println(board);
