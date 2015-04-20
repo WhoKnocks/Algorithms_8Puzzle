@@ -1,10 +1,8 @@
 package gna;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 public class Board {
 
@@ -55,7 +53,7 @@ public class Board {
         return steps;
     }
 
-    // does this board position equal y
+    // does this board positionInArray equal y
     @Override
     public boolean equals(Object y) {
         Board toCompare = (Board) y;
@@ -71,7 +69,7 @@ public class Board {
 
     // return a Collection of all neighboring board positions
     public Collection<Board> neighbors() {
-        Collection<Board> neighbors = new ArrayList<Board>();
+        Collection<Board> neighbors = new HashSet<Board>();
         Pair currPositionZero = getCurrentPosition(0);
 
         Board neighbor;
@@ -117,22 +115,14 @@ public class Board {
     }
 
     public boolean isSameAsParent(Board board) {
-        for (Board parent : getParents()) {
-            if (parent.equals(board)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public List<Board> getParents() {
-        List<Board> list = new ArrayList<Board>();
         Board prev = this.getPreviousBoard();
         while (prev != null) {
-            list.add(prev);
+            if (prev.equals(board)) {
+                return true;
+            }
             prev = prev.getPreviousBoard();
         }
-        return list;
+        return false;
     }
 
     // return a string representation of the board
@@ -169,34 +159,40 @@ public class Board {
         //now the board is ready
 
         //place the board in an array
-        int[] array = new int[tiles.length * tiles.length];
+        int[] flatArray = new int[tiles.length * tiles.length];
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
                 int counter = (i * tiles.length) + j;
-                array[counter] = tiles[i][j];
+                flatArray[counter] = tiles[i][j];
             }
         }
 
-        //bereken teller
-        BigInteger teller = BigInteger.ONE;
+        //Array with indexes
+        int[] indexArray = new int[tiles.length * tiles.length];
+        for (int i = 0; i < tiles.length * tiles.length; i++) {
+            indexArray[i] = positionInArray(flatArray, i);
+        }
+
+
+        //compute numerator
+        BigInteger numerator = BigInteger.ONE;
         for (int j = 1; j < tiles.length * tiles.length; j++) {
-            int i = 1;
-            while (i < j) {
-                teller = teller.multiply(new BigInteger(position(array, j) - position(array, i) + ""));
-                i++;
+            for (int i = 1; i < j; i++) {
+                numerator = numerator.multiply(new BigInteger((indexArray[j] - indexArray[i]) + ""));
             }
         }
 
-        BigInteger noemer = BigInteger.ONE;
+        //compute denominator
+        BigInteger denominator = BigInteger.ONE;
         for (int j = 1; j < tiles.length * tiles.length; j++) {
-            int i = 1;
-            while (i < j) {
-                noemer = noemer.multiply(new BigInteger(j - i + ""));
-                i++;
+            for (int i = 1; i < j; i++) {
+                denominator = denominator.multiply(new BigInteger(j - i + ""));
             }
+
         }
 
-        BigInteger sgn = teller.divide(noemer);
+
+        BigInteger sgn = numerator.divide(denominator);
 
         //set the original board back
         tiles = originalBoard;
@@ -208,8 +204,8 @@ public class Board {
         return false;
     }
 
-    // returns the position in the array where the number is
-    private int position(int[] array, int number) {
+    // returns the positionInArray in the array where the number is
+    private int positionInArray(int[] array, int number) {
         for (int i : array) {
             if (array[i] == number) {
                 return i + 1;
@@ -236,7 +232,7 @@ public class Board {
         return ((number - 1) % tiles.length);
     }
 
-    // returns a coordinate pair of the current position of a number
+    // returns a coordinate pair of the current positionInArray of a number
     private Pair getCurrentPosition(int number) {
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {

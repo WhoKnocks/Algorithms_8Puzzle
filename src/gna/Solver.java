@@ -70,6 +70,7 @@ public class Solver {
             tempBoard = tempBoard.getPreviousBoard();
         }
         Collections.reverse(solution);
+        System.out.println(boardPQ.size());
         return solution;
     }
 }

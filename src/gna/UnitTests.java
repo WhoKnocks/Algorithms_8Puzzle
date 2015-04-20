@@ -1,7 +1,10 @@
 package gna;
 
+import libpract.PriorityFunc;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collection;
 
 import static org.junit.Assert.*;
 
@@ -42,7 +45,7 @@ public class UnitTests {
 
     @Test
     public void manhattan_test() {
-       assertEquals(10, board.manhattan());
+        assertEquals(10, board.manhattan());
     }
 
     @Test
@@ -77,6 +80,83 @@ public class UnitTests {
 
         board = new Board(tiles);
         assertFalse(board.isSolvable());
+    }
+
+    @Test
+    public void solution_test() {
+        int[][] tiles = new int[3][3];
+        tiles[0][0] = 0;
+        tiles[0][1] = 1;
+        tiles[0][2] = 3;
+        tiles[1][0] = 4;
+        tiles[1][1] = 2;
+        tiles[1][2] = 5;
+        tiles[2][0] = 7;
+        tiles[2][1] = 8;
+        tiles[2][2] = 6;
+
+        board = new Board(tiles);
+
+        Solver s = new Solver(board, PriorityFunc.MANHATTAN);
+
+        Collection c = s.solution();
+        Object[] lijst = c.toArray();
+
+        Board bord = (Board) lijst[1];
+        tiles = new int[3][3];
+        tiles[0][0] = 1;
+        tiles[0][1] = 0;
+        tiles[0][2] = 3;
+        tiles[1][0] = 4;
+        tiles[1][1] = 2;
+        tiles[1][2] = 5;
+        tiles[2][0] = 7;
+        tiles[2][1] = 8;
+        tiles[2][2] = 6;
+
+        bord.equals(new Board(tiles));
+
+        bord = (Board) lijst[2];
+        tiles = new int[3][3];
+        tiles[0][0] = 1;
+        tiles[0][1] = 2;
+        tiles[0][2] = 3;
+        tiles[1][0] = 4;
+        tiles[1][1] = 0;
+        tiles[1][2] = 5;
+        tiles[2][0] = 7;
+        tiles[2][1] = 8;
+        tiles[2][2] = 6;
+
+        bord.equals(new Board(tiles));
+
+        bord = (Board) lijst[3];
+        tiles = new int[3][3];
+        tiles[0][0] = 1;
+        tiles[0][1] = 2;
+        tiles[0][2] = 3;
+        tiles[1][0] = 4;
+        tiles[1][1] = 5;
+        tiles[1][2] = 0;
+        tiles[2][0] = 7;
+        tiles[2][1] = 8;
+        tiles[2][2] = 6;
+
+        bord.equals(new Board(tiles));
+
+        bord = (Board) lijst[3];
+        tiles = new int[3][3];
+        tiles[0][0] = 1;
+        tiles[0][1] = 2;
+        tiles[0][2] = 3;
+        tiles[1][0] = 4;
+        tiles[1][1] = 5;
+        tiles[1][2] = 6;
+        tiles[2][0] = 7;
+        tiles[2][1] = 8;
+        tiles[2][2] = 0;
+
+        bord.equals(new Board(tiles));
     }
 
 
